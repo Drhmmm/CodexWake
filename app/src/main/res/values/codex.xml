@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="codex_mic_idle" translatable="false">Microphone: stopped or paused</string>
+    <string name="codex_mic_silenced" translatable="false">Microphone: silenced by Android</string>
+    <string name="codex_mic_level" translatable="false">Microphone level: %1$d</string>
+    <string name="codex_diagnostics" translatable="false">%1$s\nRecognition steps: %2$d\nWake detections: %3$d\n\nThe microphone level should rise when you speak. Tap here to copy diagnostics.</string>
+    <string name="codex_diagnostics_copied" translatable="false">Diagnostics copied. Paste them into our chat.</string>
     <string name="codex_enable" translatable="false">Enable Codex Wake</string>
     <string name="codex_stop" translatable="false">Stop listening</string>
     <string name="codex_instructions" translatable="false">Say “Hey Codex” to open ChatGPT Voice.\n\nTap Enable and allow the requested access. Keep ChatGPT as your default digital assistant. Listening resumes after a restart while enabled; Stop turns it off.</string>

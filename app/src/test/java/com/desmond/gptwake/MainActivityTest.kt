@@ -1,11 +1,14 @@
 package com.desmond.gptwake
 
 import android.Manifest
+import android.content.ClipboardManager
 import android.content.pm.PackageManager
 import android.provider.Settings
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.TextView
+import java.time.Duration
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -19,6 +22,49 @@ import org.robolectric.shadows.ShadowSettings
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [32, 34, 36], qualifiers = "en-rUS-w360dp-h740dp-mdpi")
 class MainActivityTest {
+    @Test fun diagnosticStatusRefreshesTheMicrophoneReading() {
+        // A frozen/default reading would hide the exact failure being investigated on the phone.
+        val rms = AudioProbe::class.java.getDeclaredField("lastRms").apply { isAccessible = true }
+        val recording = AudioProbe::class.java.getDeclaredField("RECORDING").apply { isAccessible = true }
+            .get(null) as java.util.concurrent.atomic.AtomicBoolean
+        val running = AudioProbe::class.java.getDeclaredField("RUNNING").apply { isAccessible = true }
+            .get(null) as java.util.concurrent.atomic.AtomicBoolean
+        try {
+            recording.set(true)
+            running.set(true)
+            Robolectric.buildActivity(MainActivity::class.java).setup().use { lifecycle ->
+                val activity = lifecycle.get()
+                val details = activity.window.decorView.findViewWithTag<TextView>("diagnostics")
+                assertNotNull("The phone needs a visible microphone reading", details)
+                rms.setDouble(null, 1234.0)
+                shadowOf(android.os.Looper.getMainLooper()).idleFor(Duration.ofMillis(750))
+                assertTrue(details.text.toString().contains("1234"))
+                rms.setDouble(null, 0.0)
+                shadowOf(android.os.Looper.getMainLooper()).idleFor(Duration.ofMillis(750))
+                assertFalse(details.text.toString().contains("1234"))
+            }
+        } finally {
+            rms.setDouble(null, 0.0)
+            recording.set(false)
+            running.set(false)
+        }
+    }
+
+    @Test fun tappingDiagnosticsCopiesTheActualFailureForPhoneOnlyTroubleshooting() {
+        Robolectric.buildActivity(MainActivity::class.java).setup().use { lifecycle ->
+            val activity = lifecycle.get()
+            L.e("DIRECT_LAUNCH_FAIL", IllegalStateException("test launch failure"))
+            val details = activity.window.decorView.findViewWithTag<TextView>("diagnostics")
+            assertNotNull("Diagnostics must be accessible without USB", details)
+            details.performClick()
+            val copied = activity.getSystemService(ClipboardManager::class.java)
+                .primaryClip!!.getItemAt(0).text.toString()
+            assertTrue(copied.contains("DIRECT_LAUNCH_FAIL"))
+            assertTrue(copied.contains("test launch failure"))
+            assertTrue(copied.contains("Hey Codex"))
+        }
+    }
+
     @Test fun openingAppWaitsForEnableBeforeRequestingPermissions() {
         Robolectric.buildActivity(MainActivity::class.java).setup().use { lifecycle ->
             val activity = lifecycle.get()

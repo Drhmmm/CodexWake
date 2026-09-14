@@ -3,6 +3,8 @@ package com.desmond.gptwake
 import android.Manifest
 import android.app.Activity
 import android.content.ComponentName
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -16,11 +18,13 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 
 /** The configuration screen only; recording and launching remain owned by the original service. */
 class MainActivity : Activity() {
     private lateinit var status: TextView
+    private lateinit var diagnostics: TextView
     private lateinit var enable: Button
     private lateinit var stop: Button
     private var enabling = false
@@ -65,6 +69,30 @@ class MainActivity : Activity() {
             accessibilityLiveRegion = android.view.View.ACCESSIBILITY_LIVE_REGION_POLITE
         }
         content.addView(status)
+        diagnostics = TextView(this).apply {
+            tag = "diagnostics"
+            textSize = 16f
+            setPadding(0, 0, 0, spacing)
+            isFocusable = true
+            setOnClickListener {
+                val report = buildString {
+                    append("Codex Wake ").append(packageManager.getPackageInfo(packageName, 0).versionName)
+                    append("\nAndroid ").append(Build.VERSION.RELEASE)
+                    append("\n").append(status.text).append("\n").append(diagnosticStatus())
+                    append("\nCapture: ").append(AudioProbe.lastResult())
+                    append("\nCapture policy: ").append(AudioStateMonitor.ownCaptureState())
+                    append("\nAudio mode: ").append(AudioStateMonitor.modeName(AudioStateMonitor.mode()))
+                    append("\nFrames fed: ").append(KwsEngine.acceptCalls.get())
+                    append("\nWake phrase: ").append(WakeWordStore.phrase(this@MainActivity))
+                    append("\nKeyword: ").append(WakeWordStore.keywordLine(this@MainActivity))
+                    append("\n\n").append(L.dump())
+                }
+                getSystemService(ClipboardManager::class.java)
+                    .setPrimaryClip(ClipData.newPlainText("Codex Wake diagnostics", report))
+                Toast.makeText(this@MainActivity, R.string.codex_diagnostics_copied, Toast.LENGTH_SHORT).show()
+            }
+        }
+        content.addView(diagnostics)
         content.addView(TextView(this).apply {
             setText(R.string.codex_instructions)
             textSize = 16f
@@ -236,6 +264,17 @@ class MainActivity : Activity() {
         })
         enable.isEnabled = !enabling && (!WakeService.isForegroundNow() || state == WakeController.State.ERROR)
         stop.isEnabled = enabling || WakeService.isForegroundNow() || Prefs.listeningEnabled(this)
+        diagnostics.text = diagnosticStatus()
+    }
+
+    private fun diagnosticStatus(): String {
+        val microphone = when {
+            !AudioProbe.isRunning() -> getString(R.string.codex_mic_idle)
+            AudioStateMonitor.ownCaptureState() == "silenced=true" -> getString(R.string.codex_mic_silenced)
+            else -> getString(R.string.codex_mic_level, AudioProbe.lastRms().toInt())
+        }
+        return getString(R.string.codex_diagnostics, microphone, KwsEngine.decodeCalls.get(),
+            WakeService.controller()?.acceptedHits() ?: 0L)
     }
 
     private companion object {
