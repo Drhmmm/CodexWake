@@ -1,0 +1,82 @@
+name: Build responsive Hey Codex recognition
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: codex-phone-test
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 2
+      - name: Apply tested wake recognition settings
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = f5f264f584f5aff44dba35a4998b3ae5a0d24eeb
+          python3 - <<'PY'
+          import base64, gzip, pathlib, subprocess
+          patch = pathlib.Path('/tmp/codex-diagnostics.patch')
+          patch.write_bytes(gzip.decompress(base64.b64decode('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')))
+          subprocess.run(['git', 'apply', '--index', str(patch)], check=True)
+          PY
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v4
+        with:
+          packages: platform-tools
+      - name: Install Android SDK
+        run: |
+          sdkmanager 'platforms;android-37.0' 'build-tools;37.0.0' || sdkmanager --channel=3 'platforms;android-37.0' 'build-tools;37.0.0'
+      - uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-provider: basic
+      - name: Test and build
+        run: ./gradlew --no-daemon :app:testDebugUnitTest :app:lintRelease :app:assembleRelease
+      - name: Commit tested wake recognition settings
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Improve Hey Codex recognition across pronunciation and speaking speed'
+          git push origin HEAD:main
+      - name: Sign and verify personal test APK
+        run: |
+          set -euo pipefail
+          keytool -genkeypair -keystore "$RUNNER_TEMP/test.keystore" -storepass android -keypass android -alias codex-test -keyalg RSA -keysize 2048 -validity 10000 -dname 'CN=Codex Wake Personal Test'
+          tools="$ANDROID_HOME/build-tools/37.0.0"
+          "$tools/zipalign" -P 16 -f 4 app/build/outputs/apk/release/app-release-unsigned.apk "$RUNNER_TEMP/aligned.apk"
+          "$tools/apksigner" sign --ks "$RUNNER_TEMP/test.keystore" --ks-pass pass:android --key-pass pass:android --ks-key-alias codex-test --out CodexWake.apk "$RUNNER_TEMP/aligned.apk"
+          "$tools/apksigner" verify --verbose CodexWake.apk
+          "$tools/zipalign" -c -P 16 4 CodexWake.apk
+          sha256sum CodexWake.apk > CodexWake.apk.sha256
+      - name: Publish phone download
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          version="$(sed -nE 's/^[[:space:]]*versionName = "([^"]+)".*/\1/p' app/build.gradle.kts)"
+          cat > "$RUNNER_TEMP/notes.md" <<'NOTES'
+          Uninstall the previous Codex Wake test build first (the personal test signature changes), then download **CodexWake.apk** below on your Android phone, open it, and install.
+
+          Open **Codex Wake**, tap **Enable Codex Wake**, and allow the requested access. Keep ChatGPT as your default digital assistant. Say **Hey Codex** when the status shows that it is listening.
+
+          This build makes Hey Codex detection more sensitive and accepts different stress on the second syllable. The same bundled model detected all 18 controlled 16 kHz Hey Codex speech samples with these settings, compared with 12 using the previous settings. Actual recognition on your phone still needs confirmation. Similar-sounding words can also trigger it. The diagnostic readings and original microphone handoff, launcher, and boot behavior remain.
+
+          Automated Android tests and release lint pass before publication. Actual wake recognition and lock-screen behavior still need testing on the phone. This is a personal test signature; future test builds may require uninstalling the previous build.
+          NOTES
+          gh release create "v$version" CodexWake.apk CodexWake.apk.sha256 --target "$(git rev-parse HEAD)" --title "Codex Wake $version — phone test" --notes-file "$RUNNER_TEMP/notes.md" --prerelease
+      - name: Save build reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: phone-test-reports
+          path: |
+            app/build/reports/tests/testDebugUnitTest/
+            app/build/reports/lint-results-release.*
+            app/build/outputs/mapping/release/mapping.txt
