@@ -27,7 +27,7 @@ public final class KwsEngine {
 
     // First production baseline. Smoke config was 1.0f / 0.25f; the model was confirmed to fire.
     public static volatile float keywordsScore = 1.5f;
-    public static final float DEFAULT_THRESHOLD = 0.40f;
+    public static final float DEFAULT_THRESHOLD = 0.25f;
     public static volatile float keywordsThreshold = DEFAULT_THRESHOLD;
     public static volatile int numTrailingBlanks = 1;
 
@@ -135,10 +135,15 @@ public final class KwsEngine {
         String line = customKeywordLine;
         if (line == null || line.trim().isEmpty()) line = WakeWordStore.DEFAULT_LINE;
         // Per-keyword overrides take effect without reloading the resident ONNX models.
-        int label = line.indexOf(" @");
         String parameters = " :" + keywordsScore + " #" + keywordsThreshold;
-        return label < 0 ? line + parameters
-                : line.substring(0, label) + parameters + line.substring(label);
+        String[] variants = line.split("/");
+        for (int i = 0; i < variants.length; i++) {
+            String variant = variants[i].trim();
+            int label = variant.indexOf(" @");
+            variants[i] = label < 0 ? variant + parameters
+                    : variant.substring(0, label) + parameters + variant.substring(label);
+        }
+        return String.join("/", variants);
     }
 
     public synchronized void releaseStream() {

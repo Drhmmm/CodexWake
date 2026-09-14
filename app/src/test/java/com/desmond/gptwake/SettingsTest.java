@@ -36,8 +36,10 @@ public class SettingsTest {
                 context.getAssets().open("kws/tokens.txt"), java.nio.charset.StandardCharsets.UTF_8))) {
             reader.lines().forEach(line -> tokens.add(line.substring(0, line.lastIndexOf(' '))));
         }
-        for (String phone : selection.keywordLine.substring(0, selection.keywordLine.indexOf(" @")).split(" ")) {
-            assertTrue("Unsupported model token: " + phone, tokens.contains(phone));
+        for (String variant : selection.keywordLine.split("/")) {
+            for (String phone : variant.substring(0, variant.indexOf(" @")).split(" ")) {
+                assertTrue("Unsupported model token: " + phone, tokens.contains(phone));
+            }
         }
     }
 

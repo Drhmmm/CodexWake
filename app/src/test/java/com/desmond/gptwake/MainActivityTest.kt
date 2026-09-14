@@ -104,7 +104,7 @@ class MainActivityTest {
             val selection = WakeWordStore.read(app.createDeviceProtectedStorageContext())
             assertEquals("Hey Codex", selection.phrase)
             assertEquals(WakeLanguage.ZH_EN, selection.language)
-            assertEquals("HH EY1 K OW1 D EH0 K S @Hey_Codex", selection.keywordLine)
+            assertEquals(WakeWordStore.DEFAULT_LINE, selection.keywordLine)
         }
     }
 

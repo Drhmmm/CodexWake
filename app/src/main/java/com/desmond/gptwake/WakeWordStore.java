@@ -8,8 +8,8 @@ import java.util.Map;
 public final class WakeWordStore {
 
     public static final String DEFAULT_PHRASE = "Hey Codex";
-    /** English phones from the bundled model; works before the first unlock after boot. */
-    public static final String DEFAULT_LINE = "HH EY1 K OW1 D EH0 K S @Hey_Codex";
+    /** Accept different stress on the second syllable of Codex; every variant has the same label. */
+    public static final String DEFAULT_LINE = "HH EY1 K OW1 D EH0 K S @Hey_Codex/HH EY1 K OW1 D EH1 K S @Hey_Codex/HH EY1 K OW1 D EH2 K S @Hey_Codex";
 
     private static SharedPreferences sp(Context c) {
         return c.createDeviceProtectedStorageContext()

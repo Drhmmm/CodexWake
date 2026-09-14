@@ -16,7 +16,9 @@ Android 12L or later and an ARM64 phone are required. This first personal test b
 
 The Jetpack Compose configuration screen and its dependencies have been removed. A native Activity provides Enable, Stop, permission setup, and live status. English uses GPTWake’s existing Chinese/English model with a fixed English phoneme line. The screen also replaces any previously saved custom phrase with Hey Codex.
 
-WakeService, WakeController, KwsEngine, GptLauncher, ShimActivity, BootReceiver, AudioProbe, and AudioStateMonitor retain their upstream implementations. The original model assets, Japanese support code, and third-party notices remain included. No new AI service, account, or API key is required.
+WakeService, WakeController, GptLauncher, ShimActivity, BootReceiver, AudioProbe, and AudioStateMonitor retain their upstream implementations. KwsEngine now applies the sensitivity setting to each pronunciation variant. The original model assets, Japanese support code, and third-party notices remain included. No new AI service, account, or API key is required.
+
+Version 1.1.1-codex.3 lowers the detection threshold from 0.40 to 0.25 and accepts three stress variants of the same phrase. With the bundled model and 16 kHz synthesized speech, the previous settings detected 12 of 18 samples saying “Hey Codex” (two voices, three speaking speeds, with and without a pause or following sentence); the new settings detected all 18. These controlled results do not establish accuracy on a particular phone or voice. The more sensitive setting can also activate on similar-sounding words.
 
 ## Build and verification
 

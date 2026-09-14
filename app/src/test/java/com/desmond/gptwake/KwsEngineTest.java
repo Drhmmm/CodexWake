@@ -55,10 +55,23 @@ public class KwsEngineTest {
         }
         KwsEngine.customKeywordLine = "OW1 P AH0 N @open";
         engine.newStream();
-        assertEquals("OW1 P AH0 N :1.5 #0.4 @open", Spotter.keywords);
+        assertEquals("OW1 P AH0 N :1.5 #0.25 @open", Spotter.keywords);
         KwsEngine.customKeywordLine = null;
         engine.newStream();
-        assertEquals("HH EY1 K OW1 D EH0 K S :1.5 #0.4 @Hey_Codex", Spotter.keywords);
+        assertEquals("HH EY1 K OW1 D EH0 K S :1.5 #0.25 @Hey_Codex/HH EY1 K OW1 D EH1 K S :1.5 #0.25 @Hey_Codex/HH EY1 K OW1 D EH2 K S :1.5 #0.25 @Hey_Codex", Spotter.keywords);
+    }
+
+    @Test
+    public void sensitivityAppliesToEveryPronunciationVariant() {
+        KwsEngine.customKeywordLine = "HH EY1 K OW1 D EH0 K S @Hey_Codex/HH EY1 K OW1 D EH1 K S @Hey_Codex/HH EY1 K OW1 D EH2 K S @Hey_Codex";
+        KwsEngine.keywordsThreshold = 0.25f;
+        engine.newStream();
+        String[] variants = Spotter.keywords.split("/");
+        assertEquals(3, variants.length);
+        for (String variant : variants) {
+            assertTrue("Each variant must receive the chosen sensitivity: " + variant,
+                    variant.endsWith(" :1.5 #0.25 @Hey_Codex"));
+        }
     }
 
     @Test

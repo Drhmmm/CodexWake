@@ -43,8 +43,8 @@ android {
         applicationId = "com.desmond.gptwake"
         minSdk = 32
         targetSdk = 36
-        versionCode = 5
-        versionName = "1.1.1-codex.2"
+        versionCode = 6
+        versionName = "1.1.1-codex.3"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk {
             abiFilters += "arm64-v8a"
