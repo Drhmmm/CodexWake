@@ -15,6 +15,11 @@ public final class AudioProbe {
 
     public static final int SAMPLE_RATE = 16000;
     public static final int FRAME_SAMPLES = 1280;   // 80 ms
+    private static final RecentAudioBuffer DIAGNOSTIC_AUDIO = new RecentAudioBuffer(SAMPLE_RATE * 10);
+
+    public static void beginDiagnostics() { DIAGNOSTIC_AUDIO.enable(); }
+    public static void endDiagnostics() { DIAGNOSTIC_AUDIO.disable(); }
+    public static float[] diagnosticAudio() { return DIAGNOSTIC_AUDIO.snapshot(); }
 
     public interface WakeListener {
         void onKeyword(String keyword);
@@ -201,6 +206,7 @@ public final class AudioProbe {
                 }
                 rms = Math.sqrt(sq / FRAME_SAMPLES);
                 lastRms = rms;
+                DIAGNOSTIC_AUDIO.append(frame);
 
                 if (!firstFrameSent) {
                     firstFrameSent = true;

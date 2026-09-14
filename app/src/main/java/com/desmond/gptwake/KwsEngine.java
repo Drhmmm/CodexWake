@@ -7,6 +7,8 @@ import com.k2fsa.sherpa.onnx.KeywordSpotterConfig;
 import com.k2fsa.sherpa.onnx.KeywordSpotterResult;
 import com.k2fsa.sherpa.onnx.OnlineModelConfig;
 import com.k2fsa.sherpa.onnx.OnlineStream;
+import com.k2fsa.sherpa.onnx.OnlineRecognizer;
+import com.k2fsa.sherpa.onnx.OnlineRecognizerConfig;
 import com.k2fsa.sherpa.onnx.OnlineTransducerModelConfig;
 import com.k2fsa.sherpa.onnx.VersionInfo;
 import java.io.InputStream;
@@ -144,6 +146,43 @@ public final class KwsEngine {
                     : variant.substring(0, label) + parameters + variant.substring(label);
         }
         return String.join("/", variants);
+    }
+
+    /** Runs only when diagnostics are copied; does not touch the live keyword stream. */
+    public String describeAudio(AssetManager assets, float[] samples) {
+        KeywordSpotter active = spotter;
+        if (active == null || samples.length == 0) return "MODEL_HEARD unavailable: no recent audio";
+        OnlineRecognizer recognizer = null;
+        OnlineStream diagnosticStream = null;
+        try {
+            OnlineRecognizerConfig config = new OnlineRecognizerConfig();
+            config.setFeatConfig(active.getConfig().getFeatConfig());
+            config.setModelConfig(active.getConfig().getModelConfig());
+            config.setDecodingMethod("greedy_search");
+            config.setEnableEndpoint(false);
+            recognizer = new OnlineRecognizer(assets, config);
+            diagnosticStream = recognizer.createStream("");
+            diagnosticStream.acceptWaveform(samples, 16000);
+            diagnosticStream.acceptWaveform(new float[16000], 16000);
+            diagnosticStream.inputFinished();
+            while (recognizer.isReady(diagnosticStream)) recognizer.decode(diagnosticStream);
+            String phones = String.join(" ", recognizer.getResult(diagnosticStream).getTokens());
+            double sum = 0, peak = 0;
+            for (float sample : samples) {
+                sum += (double) sample * sample;
+                peak = Math.max(peak, Math.abs(sample));
+            }
+            return String.format(java.util.Locale.ROOT,
+                    "MODEL_HEARD seconds=%.1f rms=%.1f peak=%.1f tokens=[%s]",
+                    samples.length / 16000.0, Math.sqrt(sum / samples.length) * 32768,
+                    peak * 32768, phones);
+        } catch (Throwable error) {
+            return "MODEL_HEARD failed: " + error;
+        } finally {
+            java.util.Arrays.fill(samples, 0);
+            if (diagnosticStream != null) diagnosticStream.release();
+            if (recognizer != null) recognizer.release();
+        }
     }
 
     public synchronized void releaseStream() {

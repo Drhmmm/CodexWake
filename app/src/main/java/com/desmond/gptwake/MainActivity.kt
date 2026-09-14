@@ -30,6 +30,7 @@ class MainActivity : Activity() {
     private var enabling = false
     private var waitingFor = 0
     private var message: String? = null
+    private var readingSpeech = false
     private val handler = Handler(Looper.getMainLooper())
     private val refresh = object : Runnable {
         override fun run() {
@@ -75,6 +76,7 @@ class MainActivity : Activity() {
             setPadding(0, 0, 0, spacing)
             isFocusable = true
             setOnClickListener {
+                if (readingSpeech) return@setOnClickListener
                 val report = buildString {
                     append("Codex Wake ").append(packageManager.getPackageInfo(packageName, 0).versionName)
                     append("\nAndroid ").append(Build.VERSION.RELEASE)
@@ -87,9 +89,22 @@ class MainActivity : Activity() {
                     append("\nKeyword: ").append(WakeWordStore.keywordLine(this@MainActivity))
                     append("\n\n").append(L.dump())
                 }
-                getSystemService(ClipboardManager::class.java)
-                    .setPrimaryClip(ClipData.newPlainText("Codex Wake diagnostics", report))
-                Toast.makeText(this@MainActivity, R.string.codex_diagnostics_copied, Toast.LENGTH_SHORT).show()
+                val recent = AudioProbe.diagnosticAudio()
+                val engine = WakeService.controller()?.engine()
+                if (recent.isEmpty() || engine == null) {
+                    recent.fill(0f)
+                    copyDiagnostics(report + "\nMODEL_HEARD unavailable: keep this screen open while speaking")
+                } else {
+                    readingSpeech = true
+                    Toast.makeText(this@MainActivity, R.string.codex_reading_speech, Toast.LENGTH_LONG).show()
+                    Thread({
+                        val heard = engine.describeAudio(assets, recent)
+                        handler.post {
+                            readingSpeech = false
+                            if (!isDestroyed && !isFinishing) copyDiagnostics(report + "\n\n" + heard)
+                        }
+                    }, "wake-diagnostics").start()
+                }
             }
         }
         content.addView(diagnostics)
@@ -125,13 +140,21 @@ class MainActivity : Activity() {
 
     override fun onResume() {
         super.onResume()
+        AudioProbe.beginDiagnostics()
         handler.removeCallbacks(refresh)
         handler.post(refresh)
     }
 
     override fun onPause() {
+        AudioProbe.endDiagnostics()
         handler.removeCallbacks(refresh)
         super.onPause()
+    }
+
+    private fun copyDiagnostics(report: String) {
+        getSystemService(ClipboardManager::class.java)
+            .setPrimaryClip(ClipData.newPlainText("Codex Wake diagnostics", report))
+        Toast.makeText(this, R.string.codex_diagnostics_copied, Toast.LENGTH_LONG).show()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

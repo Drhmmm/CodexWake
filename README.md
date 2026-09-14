@@ -16,7 +16,9 @@ Android 12L or later and an ARM64 phone are required. This first personal test b
 
 The Jetpack Compose configuration screen and its dependencies have been removed. A native Activity provides Enable, Stop, permission setup, and live status. English uses GPTWake’s existing Chinese/English model with a fixed English phoneme line. The screen also replaces any previously saved custom phrase with Hey Codex.
 
-WakeService, WakeController, GptLauncher, ShimActivity, BootReceiver, AudioProbe, and AudioStateMonitor retain their upstream implementations. KwsEngine now applies the sensitivity setting to each pronunciation variant. The original model assets, Japanese support code, and third-party notices remain included. No new AI service, account, or API key is required.
+WakeService, WakeController, GptLauncher, ShimActivity, BootReceiver, and AudioStateMonitor retain their upstream implementations. KwsEngine applies the sensitivity setting to each pronunciation variant. The original model assets, Japanese support code, and third-party notices remain included. No new AI service, account, or API key is required.
+
+Version 1.1.1-codex.4 adds on-device speech diagnostics. While the app screen is visible, AudioProbe keeps the latest ten seconds of audio in memory; leaving the screen clears that buffer. Tapping the diagnostics decodes a snapshot with the same model, without keyword constraints, and includes its speech-sound tokens in the copied report. The audio is not saved or uploaded. This diagnoses missed detections; recognition and launch settings remain those from version .3.
 
 Version 1.1.1-codex.3 lowers the detection threshold from 0.40 to 0.25 and accepts three stress variants of the same phrase. With the bundled model and 16 kHz synthesized speech, the previous settings detected 12 of 18 samples saying “Hey Codex” (two voices, three speaking speeds, with and without a pause or following sentence); the new settings detected all 18. These controlled results do not establish accuracy on a particular phone or voice. The more sensitive setting can also activate on similar-sounding words.
 

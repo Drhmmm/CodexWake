@@ -3,7 +3,8 @@
     <string name="codex_mic_idle" translatable="false">Microphone: stopped or paused</string>
     <string name="codex_mic_silenced" translatable="false">Microphone: silenced by Android</string>
     <string name="codex_mic_level" translatable="false">Microphone level: %1$d</string>
-    <string name="codex_diagnostics" translatable="false">%1$s\nRecognition steps: %2$d\nWake detections: %3$d\n\nThe microphone level should rise when you speak. Tap here to copy diagnostics.</string>
+    <string name="codex_diagnostics" translatable="false">%1$s\nRecognition steps: %2$d\nWake detections: %3$d\n\nSay Hey Codex with this screen open, then tap here. Wait for “Diagnostics copied,” then paste into our chat.</string>
+    <string name="codex_reading_speech" translatable="false">Checking recent speech on your phone… Please wait.</string>
     <string name="codex_diagnostics_copied" translatable="false">Diagnostics copied. Paste them into our chat.</string>
     <string name="codex_enable" translatable="false">Enable Codex Wake</string>
     <string name="codex_stop" translatable="false">Stop listening</string>
