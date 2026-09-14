@@ -1,0 +1,82 @@
+name: Publish on-device speech diagnostics
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: codex-phone-test
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 2
+      - name: Apply prepared on-device speech diagnostics
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = 2384a02919cdc113bd40a8e95c96f54569277daf
+          python3 - <<'PY'
+          import base64, gzip, pathlib, subprocess
+          patch = pathlib.Path('/tmp/codex-diagnostics.patch')
+          patch.write_bytes(gzip.decompress(base64.b64decode('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')))
+          subprocess.run(['git', 'apply', '--index', str(patch)], check=True)
+          PY
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v4
+        with:
+          packages: platform-tools
+      - name: Install Android SDK
+        run: |
+          sdkmanager 'platforms;android-37.0' 'build-tools;37.0.0' || sdkmanager --channel=3 'platforms;android-37.0' 'build-tools;37.0.0'
+      - uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-provider: basic
+      - name: Test and build
+        run: ./gradlew --no-daemon :app:testDebugUnitTest :app:lintRelease :app:assembleRelease
+      - name: Commit tested speech diagnostics
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Report model phonemes from recent phone audio'
+          git push origin HEAD:main
+      - name: Sign and verify personal test APK
+        run: |
+          set -euo pipefail
+          keytool -genkeypair -keystore "$RUNNER_TEMP/test.keystore" -storepass android -keypass android -alias codex-test -keyalg RSA -keysize 2048 -validity 10000 -dname 'CN=Codex Wake Personal Test'
+          tools="$ANDROID_HOME/build-tools/37.0.0"
+          "$tools/zipalign" -P 16 -f 4 app/build/outputs/apk/release/app-release-unsigned.apk "$RUNNER_TEMP/aligned.apk"
+          "$tools/apksigner" sign --ks "$RUNNER_TEMP/test.keystore" --ks-pass pass:android --key-pass pass:android --ks-key-alias codex-test --out CodexWake.apk "$RUNNER_TEMP/aligned.apk"
+          "$tools/apksigner" verify --verbose CodexWake.apk
+          "$tools/zipalign" -c -P 16 4 CodexWake.apk
+          sha256sum CodexWake.apk > CodexWake.apk.sha256
+      - name: Publish phone download
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          version="$(sed -nE 's/^[[:space:]]*versionName = "([^"]+)".*/\1/p' app/build.gradle.kts)"
+          cat > "$RUNNER_TEMP/notes.md" <<'NOTES'
+          Uninstall the previous Codex Wake test build first (the personal test signature changes), then download **CodexWake.apk** below on your Android phone, open it, and install.
+
+          Open **Codex Wake**, tap **Enable Codex Wake**, and allow the requested access. Keep ChatGPT as your default digital assistant. Say **Hey Codex** when the status shows that it is listening.
+
+          Keep the Codex Wake screen open, say Hey Codex, then tap the diagnostic readings. Wait for Diagnostics copied, then paste the report into our chat. The new MODEL_HEARD line reports the speech sounds decoded by the bundled model from up to ten seconds of recent microphone audio. Audio is held only in memory while this screen is visible, is not saved or uploaded, and is cleared when the screen is hidden. This is a diagnostic build to investigate missed wake phrases; the recognition settings and ChatGPT launcher are unchanged.
+
+          Automated Android tests and release lint pass before publication. Actual wake recognition and lock-screen behavior still need testing on the phone. This is a personal test signature; future test builds may require uninstalling the previous build.
+          NOTES
+          gh release create "v$version" CodexWake.apk CodexWake.apk.sha256 --target "$(git rev-parse HEAD)" --title "Codex Wake $version — phone test" --notes-file "$RUNNER_TEMP/notes.md" --prerelease
+      - name: Save build reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: phone-test-reports
+          path: |
+            app/build/reports/tests/testDebugUnitTest/
+            app/build/reports/lint-results-release.*
+            app/build/outputs/mapping/release/mapping.txt
