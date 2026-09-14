@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="codex_enable" translatable="false">Enable Codex Wake</string>
+    <string name="codex_stop" translatable="false">Stop listening</string>
+    <string name="codex_instructions" translatable="false">Say “Hey Codex” to open ChatGPT Voice.\n\nTap Enable and allow the requested access. Keep ChatGPT as your default digital assistant. Listening resumes after a restart while enabled; Stop turns it off.</string>
+    <string name="codex_disabled" translatable="false">Status: Not enabled</string>
+    <string name="codex_setup" translatable="false">Status: Complete setup to enable listening</string>
+    <string name="codex_starting" translatable="false">Status: Starting listener…</string>
+    <string name="codex_listening" translatable="false">Status: Listening for Hey Codex</string>
+    <string name="codex_launching" translatable="false">Status: Opening ChatGPT Voice…</string>
+    <string name="codex_voice" translatable="false">Status: ChatGPT Voice is active</string>
+    <string name="codex_paused" translatable="false">Status: Paused during a call</string>
+    <string name="codex_error" translatable="false">Status: Listener error. Tap Enable to retry.</string>
+    <string name="codex_mic_needed" translatable="false">Microphone access is needed. Tap Enable to try again.</string>
+    <string name="codex_overlay_needed" translatable="false">Allow Codex Wake to appear on top, then tap Enable again.</string>
+    <string name="codex_assistant_needed" translatable="false">Choose ChatGPT as your default digital assistant, then tap Enable again.</string>
+</resources>

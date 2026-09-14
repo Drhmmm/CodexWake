@@ -58,7 +58,7 @@ public class KwsEngineTest {
         assertEquals("OW1 P AH0 N :1.5 #0.4 @open", Spotter.keywords);
         KwsEngine.customKeywordLine = null;
         engine.newStream();
-        assertEquals("zh ī m á k āi m én :1.5 #0.4 @芝麻开门", Spotter.keywords);
+        assertEquals("HH EY1 K OW1 D EH0 K S :1.5 #0.4 @Hey_Codex", Spotter.keywords);
     }
 
     @Test

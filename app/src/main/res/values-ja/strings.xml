@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">GPTWake</string>
+    <string name="app_name">Codex Wake</string>
     <string name="tagline">オフラインのウェイクワードで ChatGPT 音声を起動</string>
     <string name="status_title">状態</string>
     <string name="action_start">開始</string>

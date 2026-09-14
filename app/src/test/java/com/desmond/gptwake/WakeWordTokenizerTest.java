@@ -21,8 +21,8 @@ public class WakeWordTokenizerTest {
 
     @Test
     public void defaultPhraseMatchesBundledTokens() {
-        assertEquals(WakeWordStore.DEFAULT_LINE,
-                tokenizer.convert(WakeWordStore.DEFAULT_PHRASE).keywordLine);
+        assertEquals("zh ī m á k āi m én @芝麻开门",
+                tokenizer.convert("芝麻开门").keywordLine);
     }
 
     @Test

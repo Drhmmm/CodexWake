@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">GPTWake</string>
+    <string name="app_name">Codex Wake</string>
     <string name="tagline">Offline wake word · opens ChatGPT voice</string>
 
     <string name="status_title">Status</string>

@@ -27,6 +27,21 @@ public class SettingsTest {
     }
 
     @Test
+    public void defaultEnglishPhraseUsesOnlyBundledModelTokensBeforeUnlock() throws Exception {
+        var selection = WakeWordStore.read(context.createDeviceProtectedStorageContext());
+        assertEquals("Hey Codex", selection.phrase);
+        assertEquals(WakeLanguage.ZH_EN, selection.language);
+        var tokens = new java.util.HashSet<String>();
+        try (var reader = new java.io.BufferedReader(new java.io.InputStreamReader(
+                context.getAssets().open("kws/tokens.txt"), java.nio.charset.StandardCharsets.UTF_8))) {
+            reader.lines().forEach(line -> tokens.add(line.substring(0, line.lastIndexOf(' '))));
+        }
+        for (String phone : selection.keywordLine.substring(0, selection.keywordLine.indexOf(" @")).split(" ")) {
+            assertTrue("Unsupported model token: " + phone, tokens.contains(phone));
+        }
+    }
+
+    @Test
     public void newInstallDoesNotStartListeningAtBoot() {
         new BootReceiver().onReceive(context, new Intent(Intent.ACTION_LOCKED_BOOT_COMPLETED));
         assertNull(shadowOf(RuntimeEnvironment.getApplication()).getNextStartedActivity());

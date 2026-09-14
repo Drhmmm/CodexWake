@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">GPTWake</string>
+    <string name="app_name">Codex Wake</string>
     <string name="tagline">离线唤醒词 · 呼出 ChatGPT 语音</string>
 
     <string name="status_title">状态</string>

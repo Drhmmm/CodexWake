@@ -7,9 +7,9 @@ import java.util.Map;
 /** Persisted wake phrase, kept in device-protected storage so it survives Direct Boot. */
 public final class WakeWordStore {
 
-    public static final String DEFAULT_PHRASE = "芝麻开门";
-    /** Matches assets/kws/keywords.txt, used when nothing custom is stored. */
-    public static final String DEFAULT_LINE = "zh ī m á k āi m én @芝麻开门";
+    public static final String DEFAULT_PHRASE = "Hey Codex";
+    /** English phones from the bundled model; works before the first unlock after boot. */
+    public static final String DEFAULT_LINE = "HH EY1 K OW1 D EH0 K S @Hey_Codex";
 
     private static SharedPreferences sp(Context c) {
         return c.createDeviceProtectedStorageContext()

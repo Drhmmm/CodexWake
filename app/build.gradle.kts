@@ -1,14 +1,16 @@
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.Property
 import org.gradle.process.ExecOperations
 import javax.inject.Inject
 
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.plugin.compose")
+
 }
 
 abstract class PrepareJapaneseModels : DefaultTask() {
+    @get:Input abstract val bashExecutable: Property<String>
     @get:OutputDirectory abstract val outputDirectory: DirectoryProperty
     @get:InputFile abstract val fetchScript: RegularFileProperty
     @get:InputFile abstract val checksums: RegularFileProperty
@@ -17,8 +19,8 @@ abstract class PrepareJapaneseModels : DefaultTask() {
     @TaskAction
     fun prepare() {
         execOperations.exec {
-            commandLine("bash", fetchScript.get().asFile.absolutePath,
-                outputDirectory.get().dir("ja").asFile.absolutePath)
+            commandLine(bashExecutable.get(), fetchScript.get().asFile.invariantSeparatorsPath,
+                outputDirectory.get().dir("ja").asFile.invariantSeparatorsPath)
         }
     }
 }
@@ -26,6 +28,7 @@ abstract class PrepareJapaneseModels : DefaultTask() {
 val prepareJapaneseModels by tasks.registering(PrepareJapaneseModels::class) {
     group = "build setup"
     description = "Fetch and verify the pinned offline Japanese recognition models"
+    bashExecutable.set(providers.environmentVariable("BASH").orElse("bash"))
     fetchScript.set(rootProject.layout.projectDirectory.file("tools/fetch-japanese-deps.sh"))
     checksums.set(layout.projectDirectory.file("src/main/assets/ja/SHA256SUMS"))
     outputDirectory.set(layout.buildDirectory.dir("generated/japaneseAssets"))
@@ -33,17 +36,15 @@ val prepareJapaneseModels by tasks.registering(PrepareJapaneseModels::class) {
 
 android {
     namespace = "com.desmond.gptwake"
-    // 37 is required by compose.ui 1.12.0-beta02, which material3 1.5.0-alpha24 depends on.
-    // targetSdk deliberately stays at 36 — this is a compile-time requirement, not a
-    // behaviour opt-in.
+    // Keep the upstream SDK and service behavior unchanged.
     compileSdk = 37
 
     defaultConfig {
         applicationId = "com.desmond.gptwake"
         minSdk = 32
         targetSdk = 36
-        versionCode = 3
-        versionName = "1.1.0"
+        versionCode = 4
+        versionName = "1.1.1-codex.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk {
             abiFilters += "arm64-v8a"
@@ -58,7 +59,7 @@ android {
 
     buildFeatures {
         viewBinding = false
-        compose = true
+
     }
 
     testOptions {
@@ -124,41 +125,14 @@ dependencies {
     // Offline Japanese kanji readings; includes the IPADIC dictionary in the APK.
     implementation("com.atilika.kuromoji:kuromoji-ipadic:0.9.0")
 
-    // Compose, on the ALPHA BOM (-> material3 1.5.0-alpha24, compose.ui 1.12.0-beta02).
-    //
-    // This is deliberate and it is the only way to get Material 3 Expressive. On stable
-    // material3 1.4.0 every Expressive entry point is Kotlin-`internal` and unusable from
-    // app code: MaterialExpressiveTheme, MotionScheme, MaterialTheme.motionScheme, and the
-    // increased shape scale (name-mangled `getLargeIncreased$material3`). Only the flexible
-    // app bars are public there.
-    //
-    // The cost is that these APIs move: ButtonGroup and friends shipped in 1.4.0-alpha18 and
-    // were removed again before 1.4.0-beta01. Pin the BOM and read the release notes before
-    // bumping it.
-    implementation(platform("androidx.compose:compose-bom-alpha:2026.07.00"))
-    implementation("androidx.compose.material3:material3")
-    implementation("androidx.compose.material:material-icons-core")
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.ui:ui-tooling-preview")
-    debugImplementation("androidx.compose.ui:ui-tooling")
-    implementation("androidx.activity:activity-compose:1.13.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.11.0")
-
-    // Morph and RoundedPolygon live here, not in material3 — MaterialShapes only supplies the
-    // named presets. Pinned above the 1.0.1 that material3 resolves to.
-    implementation("androidx.graphics:graphics-shapes:1.1.0")
-
     implementation("androidx.core:core-splashscreen:1.0.1")
     implementation("androidx.core:core:1.17.0")
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.robolectric:robolectric:4.16.1")
     testImplementation("org.mockito:mockito-core:5.23.0")
-    testImplementation("androidx.compose.ui:ui-test-junit4")
     androidTestImplementation("androidx.test:runner:1.7.0")
     androidTestImplementation("androidx.test.ext:junit:1.3.0")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
 
-    // The Views stack (appcompat, com.google.android.material, constraintlayout) is gone along
-    // with MainActivity.java and activity_main.xml. Nothing in the app references it any more.
+
 }
