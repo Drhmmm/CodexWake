@@ -1,0 +1,82 @@
+name: Publish Codex Wake phone diagnostics
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: codex-phone-test
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 2
+      - name: Apply prepared diagnostic screen update
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = 5779b728c994011b74bd24c27187dc7c5ce81a03
+          python3 - <<'PY'
+          import base64, gzip, pathlib, subprocess
+          patch = pathlib.Path('/tmp/codex-diagnostics.patch')
+          patch.write_bytes(gzip.decompress(base64.b64decode('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')))
+          subprocess.run(['git', 'apply', '--index', str(patch)], check=True)
+          PY
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v4
+        with:
+          packages: platform-tools
+      - name: Install Android SDK
+        run: |
+          sdkmanager 'platforms;android-37.0' 'build-tools;37.0.0' || sdkmanager --channel=3 'platforms;android-37.0' 'build-tools;37.0.0'
+      - uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-provider: basic
+      - name: Test and build
+        run: ./gradlew --no-daemon :app:testDebugUnitTest :app:lintRelease :app:assembleRelease
+      - name: Commit tested diagnostic screen
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Show microphone and recognition diagnostics on the phone'
+          git push origin HEAD:main
+      - name: Sign and verify personal test APK
+        run: |
+          set -euo pipefail
+          keytool -genkeypair -keystore "$RUNNER_TEMP/test.keystore" -storepass android -keypass android -alias codex-test -keyalg RSA -keysize 2048 -validity 10000 -dname 'CN=Codex Wake Personal Test'
+          tools="$ANDROID_HOME/build-tools/37.0.0"
+          "$tools/zipalign" -P 16 -f 4 app/build/outputs/apk/release/app-release-unsigned.apk "$RUNNER_TEMP/aligned.apk"
+          "$tools/apksigner" sign --ks "$RUNNER_TEMP/test.keystore" --ks-pass pass:android --key-pass pass:android --ks-key-alias codex-test --out CodexWake.apk "$RUNNER_TEMP/aligned.apk"
+          "$tools/apksigner" verify --verbose CodexWake.apk
+          "$tools/zipalign" -c -P 16 4 CodexWake.apk
+          sha256sum CodexWake.apk > CodexWake.apk.sha256
+      - name: Publish phone download
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          version="$(sed -nE 's/^[[:space:]]*versionName = "([^"]+)".*/\1/p' app/build.gradle.kts)"
+          cat > "$RUNNER_TEMP/notes.md" <<'NOTES'
+          Uninstall the previous Codex Wake test build first (the personal test signature changes), then download **CodexWake.apk** below on your Android phone, open it, and install.
+
+          Open **Codex Wake**, tap **Enable Codex Wake**, and allow the requested access. Keep ChatGPT as your default digital assistant. Say **Hey Codex** when the status shows that it is listening.
+
+          This diagnostic build adds a live microphone level, recognition activity count, and wake detection count. Tap the readings to copy diagnostic text for troubleshooting. It does not change recognition or launch behavior, and is not yet a confirmed fix for missed wake phrases.
+
+          Automated Android tests and release lint pass before publication. Actual wake recognition and lock-screen behavior still need testing on the phone. This is a personal test signature; future test builds may require uninstalling the previous build.
+          NOTES
+          gh release create "v$version" CodexWake.apk CodexWake.apk.sha256 --target "$(git rev-parse HEAD)" --title "Codex Wake $version — phone test" --notes-file "$RUNNER_TEMP/notes.md" --prerelease
+      - name: Save build reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: phone-test-reports
+          path: |
+            app/build/reports/tests/testDebugUnitTest/
+            app/build/reports/lint-results-release.*
+            app/build/outputs/mapping/release/mapping.txt
